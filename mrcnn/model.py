@@ -2125,10 +2125,14 @@ class MaskRCNN():
         # Update the log directory
         self.set_log_dir(filepath)
 
-    def get_imagenet_weights(self):
+    def get_imagenet_weights(self, dir=None, name=None):
         """Downloads ImageNet trained weights from Keras.
         Returns path to weights file.
         """
+        if dir and name:
+            weights_path = os.path.join(dir, name)
+            return weights_path
+
         from keras.utils.data_utils import get_file
         TF_WEIGHTS_PATH_NO_TOP = 'https://github.com/fchollet/deep-learning-models/'\
                                  'releases/download/v0.2/'\
@@ -2159,7 +2163,7 @@ class MaskRCNN():
             if layer.output in self.keras_model.losses:
                 continue
             loss = (
-                tf.reduce_mean(layer.output, keepdims=True)
+                tf.reduce_mean(layer.output, keep_dims=True)
                 * self.config.LOSS_WEIGHTS.get(name, 1.))
             self.keras_model.add_loss(loss)
 
@@ -2183,7 +2187,7 @@ class MaskRCNN():
             layer = self.keras_model.get_layer(name)
             self.keras_model.metrics_names.append(name)
             loss = (
-                tf.reduce_mean(layer.output, keepdims=True)
+                tf.reduce_mean(layer.output, keep_dims=True)
                 * self.config.LOSS_WEIGHTS.get(name, 1.))
             self.keras_model.metrics_tensors.append(loss)
 
@@ -2256,8 +2260,8 @@ class MaskRCNN():
             self.config.NAME.lower(), now))
 
         # Create log_dir if not exists
-        if not os.path.exists(self.log_dir):
-            os.makedirs(self.log_dir)
+        # if not os.path.exists(self.log_dir):
+        #     os.makedirs(self.log_dir)
 
         # Path to save after each epoch. Include placeholders that get filled by Keras.
         self.checkpoint_path = os.path.join(self.log_dir, "mask_rcnn_{}_*epoch*.h5".format(
